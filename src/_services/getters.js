@@ -1,9 +1,11 @@
 import { authHeader, handleResponse } from "../_helpers/authConfig";
-import axios from 'axios';
+import axios from "axios";
 
-export function  getAll() {
+export function getAll() {
   return axios
-    .get('http://localhost:8080/api/clientes', { headers: { Authorization: authHeader() } })
+    .get("http://localhost:8080/api/clientes", {
+      headers: { Authorization: authHeader() }
+    })
     .then(response => {
       return response.data;
     })
@@ -12,9 +14,9 @@ export function  getAll() {
     });
 }
 
-export function getCEP(cep){
-    return axios
-    .get('http://viacep.com.br/ws/'+cep+'/json/')
+export function getCEP(cep) {
+  return axios
+    .get("http://viacep.com.br/ws/" + cep + "/json/")
     .then(response => {
       return response.data;
     })
@@ -23,13 +25,13 @@ export function getCEP(cep){
     });
 }
 
-export function salvarCliente(formulario){
-    return axios({
-        method: "post",
-        url: `http://localhost:8080/api/clientes`,
-        data: formulario,
-        headers: { Authorization: authHeader()}
-      });
+export function salvarCliente(formulario) {
+  return axios({
+    method: "post",
+    url: `http://localhost:8080/api/clientes`,
+    data: formulario,
+    headers: { Authorization: authHeader() }
+  });
 }
 
 export function getById(id) {}

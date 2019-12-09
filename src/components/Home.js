@@ -7,12 +7,13 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { Paper } from "@material-ui/core";
+import Fab from "@material-ui/core/Fab";
+import AddIcon from "@material-ui/icons/Add";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
-import AccountCircle from "@material-ui/icons/AccountCircle";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 
 class Home extends React.Component {
   constructor(props) {
@@ -23,31 +24,33 @@ class Home extends React.Component {
     };
     const usuario = authenticationService.tokenValido();
     if (!usuario) {
-      // window.location.href = '/login';
+      window.location.href = "/login";
     }
     const admin = authenticationService.verificaAdmin();
     if (!admin) {
     }
+
+    this.todosClientes = this.todosClientes.bind(this);
   }
 
   componentDidMount() {
     this.todosClientes();
   }
 
-  createData(id, Nome, cpf) {
-    return { id, Nome, cpf };
+  createData(id, nomeCliente, cpf) {
+    return { id, nomeCliente, cpf };
   }
 
   todosClientes = () => {
-    const resultado = getAll().then(function(result) {
-        // this.setState({ clientes: result });
-         console.log(result);
-      });
-}
+    getAll().then(res => this.setState({ clientes: res }));
+  };
 
-  novoCliente() {
-    // console.log("oia");
-  }
+  novoCliente = e => {
+    window.location.href = "/Cliente";
+  };
+  logout = e => {
+    authenticationService.logout();
+  };
 
   render() {
     const rows = this.state.clientes;
@@ -56,21 +59,23 @@ class Home extends React.Component {
       <Paper>
         <AppBar position="static">
           <Toolbar>
-            <IconButton edge="start" color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6">Photos</Typography>
+            <Typography variant="h6" style={style.title}>
+              Clientes
+            </Typography>
             <IconButton
+              onClick={this.logout}
+              style={style.appbarIcone}
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               color="inherit"
+              title="Sair"
             >
-              <AccountCircle onClick={this.novoCliente()} />
+              <ExitToAppIcon />
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Table aria-label="simple table">
+        <Table style={style.tabela} aria-label="simple table">
           <TableHead>
             <TableRow>
               <TableCell>Nome</TableCell>
@@ -79,9 +84,9 @@ class Home extends React.Component {
           </TableHead>
           <TableBody>
             {rows.map(row => (
-              <TableRow key={row.Nome}>
+              <TableRow key={row.id}>
                 <TableCell component="th" scope="row">
-                  {row.Nome}
+                  {row.nomeCliente}
                 </TableCell>
                 <TableCell align="center" component="th" scope="row">
                   {row.cpf}
@@ -90,9 +95,35 @@ class Home extends React.Component {
             ))}
           </TableBody>
         </Table>
+        <Fab
+          style={style.fab}
+          onClick={this.novoCliente}
+          color="primary"
+          aria-label="add"
+        >
+          <AddIcon />
+        </Fab>
       </Paper>
     );
   }
 }
+
+const style = {
+  fab: {
+    position: "absolute",
+    right: "15px",
+    bottom: "15px"
+  },
+  root: {
+    flexGrow: "1"
+  },
+  menuButton: {
+    marginRight: "0"
+  },
+  title: {
+    flexGrow: "1",
+    textAlign: "center"
+  }
+};
 
 export default Home;
