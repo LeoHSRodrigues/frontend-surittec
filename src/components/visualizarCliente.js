@@ -1,6 +1,11 @@
 import React from "react";
 import { authenticationService } from "../_services/authenticationService";
-import { getCEP, salvarCliente, getById,atualizarCliente } from "../_services/getters";
+import {
+  getCEP,
+  salvarCliente,
+  getById,
+  atualizarCliente
+} from "../_services/getters";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import { Paper } from "@material-ui/core";
@@ -16,104 +21,7 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import AddIcon from "@material-ui/icons/Add";
 
-class ClienteFormulario extends React.Component {
-  handleSubmit = e => {
-    e.preventDefault();
-    if (this.state.itemsEmail.length === 0) {
-      alert("Adicione pelo menos 1 email");
-      return
-    }
-    if (this.state.itemsTelefone.length === 0) {
-      alert("Adicione pelo menos 1 telefone");
-      return
-    }
-    let cepFinal = this.state.cep.split('-')
-    let cpfFinal = this.state.cpf.split('.')
-    cpfFinal = cpfFinal[0]+cpfFinal[1]+cpfFinal[2];
-    cpfFinal = cpfFinal.split('-')
-    cpfFinal = cpfFinal[0]+cpfFinal[1];
-    cepFinal = cepFinal[0]+cepFinal[1];
-    let emailsFinais = [];
-    let telefonesFinais = [];
-    for (let i = 0; i < this.state.itemsEmail.length; i++) {
-      emailsFinais.push({
-          email: this.state.itemsEmail[i],
-          // optionValue: status.options[i].value
-      });
-  }
-    for (let i = 0; i < this.state.itemsTelefone.length; i++) {
-      let telefone = this.state.itemsTelefone[i].split('-');
-      let resultTelefoneFinal = telefone[0]+telefone[1];
-      resultTelefoneFinal = resultTelefoneFinal.substr(1);
-      resultTelefoneFinal = resultTelefoneFinal.slice(0, 3) + resultTelefoneFinal.slice(4);
-      resultTelefoneFinal = resultTelefoneFinal.split(')');
-      resultTelefoneFinal = resultTelefoneFinal[0]+resultTelefoneFinal[1];
-      if (telefone[2].trim() === 'Residencial' || telefone[2].trim() === 'RESIDENCIAL'){
-        telefonesFinais.push({
-          telefone: resultTelefoneFinal,
-          tipotelefone: '0'
-      });
-      }
-      else if (telefone[2].trim() === 'Comercial' || telefone[2].trim() === 'COMERCIAL') {
-        telefonesFinais.push({
-          telefone: resultTelefoneFinal,
-          tipotelefone: '1'
-      });
-      }
-      else {
-        telefonesFinais.push({
-          telefone: resultTelefoneFinal,
-          tipotelefone: '2'
-      });
-      }
-  }
-    
-    if (this.props.match.params.id) {
-    const form = {
-      "id":this.props.match.params.id,
-      "nome": this.state.nome,
-      "cpf":cpfFinal,
-      "cep":cepFinal,
-      "logradouro":this.state.logradouro,
-      "bairro":this.state.bairro,
-      "cidade":this.state.cidade,
-      "uf":this.state.uf,
-      "email":emailsFinais,
-      "telefone":telefonesFinais
-    }
-    atualizarCliente(form,this.props.match.params.id).then(
-      user => {
-        window.location.href = "/home";
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  }
-  else{
-    const form = {
-      "id":this.props.match.params.id,
-      "nome": this.state.nome,
-      "cpf":cpfFinal,
-      "cep":cepFinal,
-      "logradouro":this.state.logradouro,
-      "bairro":this.state.bairro,
-      "cidade":this.state.cidade,
-      "uf":this.state.uf,
-      "email":emailsFinais,
-      "telefone":telefonesFinais
-    }
-        salvarCliente(form).then(
-          user => {
-            window.location.href = "/home";
-          },
-          error => {
-            console.log(error);
-          }
-        );
-  }
-  };
-  
+class visualizarCliente extends React.Component {
 
   constructor(props) {
     super(props);
@@ -135,10 +43,6 @@ class ClienteFormulario extends React.Component {
       // cadastro: true
     };
     this.state.cadastro = this.verificaEditar();
-    const admin = authenticationService.verificaAdmin();
-    if (!admin) {
-      window.location.href = "/home";
-    }
   }
 
   componentDidMount() {
@@ -151,41 +55,48 @@ class ClienteFormulario extends React.Component {
   verificaEditar() {
     if (this.props.match.params.id) {
       getById(this.props.match.params.id)
-      .then(response => {
-        this.setState({ nome: response.nome });
-        const cpfFinal = response.cpf
-        .replace(/\D/g, "")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-        .replace(/(-\d{2})\d+?$/, "$1");
-        this.setState({ cpf: cpfFinal });
-        const cepFinal = response.cep.substring(0, 5) + "-" + response.cep.substring(5);
-        this.setState({ cep: cepFinal });
-        this.setState({ logradouro: response.logradouro });
-        if (response.complemento !== null){
-          this.setState({ complemento: response.complemento })
-        }
-        this.setState({ complemento: "" })
-        this.setState({ bairro: response.bairro });
-        this.setState({ cidade: response.cidade });
-        this.setState({ uf: response.uf });
-        const finalArray = response.email.map(function (obj) {
-          return obj.email;
+        .then(response => {
+          this.setState({ nome: response.nome });
+          const cpfFinal = response.cpf
+            .replace(/\D/g, "")
+            .replace(/(\d{3})(\d)/, "$1.$2")
+            .replace(/(\d{3})(\d)/, "$1.$2")
+            .replace(/(\d{3})(\d{1,2})/, "$1-$2")
+            .replace(/(-\d{2})\d+?$/, "$1");
+          this.setState({ cpf: cpfFinal });
+          const cepFinal =
+            response.cep.substring(0, 5) + "-" + response.cep.substring(5);
+          this.setState({ cep: cepFinal });
+          this.setState({ logradouro: response.logradouro });
+          if (response.complemento !== null) {
+            this.setState({ complemento: response.complemento });
+          }
+          this.setState({ complemento: "" });
+          this.setState({ bairro: response.bairro });
+          this.setState({ cidade: response.cidade });
+          this.setState({ uf: response.uf });
+          const finalArray = response.email.map(function(obj) {
+            return obj.email;
+          });
+          const finalArrayTelefone = response.telefone.map(function(obj) {
+            let nTelefone = obj.telefone
+              .replace(/\D/g, "")
+              .replace(/^(\d{2})(\d)/g, "($1) $2")
+              .replace(/(\d)(\d{4})$/, "$1-$2")
+              .replace(/(\d)(\d{4})$/, "$1");
+            return nTelefone + " - " + obj.tipotelefone;
+          });
+          this.setState({
+            itemsTelefone: [...this.state.itemsTelefone, ...finalArrayTelefone]
+          });
+          this.setState({
+            itemsEmail: [...this.state.itemsEmail, ...finalArray]
+          });
+        })
+        .catch(error => {
+            window.location.href = "/home";
+          console.log(error);
         });
-        const finalArrayTelefone = response.telefone.map(function (obj) {
-         let nTelefone =  obj.telefone.replace(/\D/g, "")
-          .replace(/^(\d{2})(\d)/g, "($1) $2")
-          .replace(/(\d)(\d{4})$/, "$1-$2")
-          .replace(/(\d)(\d{4})$/, "$1");
-          return nTelefone + ' - ' + obj.tipotelefone;
-        });
-        this.setState({ itemsTelefone: [...this.state.itemsTelefone, ...finalArrayTelefone]});
-        this.setState({ itemsEmail: [...this.state.itemsEmail, ...finalArray]});
-      })
-      .catch(error => {
-        window.location.href = "/home";
-      });
       return true;
     }
     return false;
@@ -272,31 +183,28 @@ class ClienteFormulario extends React.Component {
     }
   };
   adicionarTelefone = e => {
-    if (this.state.telefone.length >= 14 && this.state.tipoTelefone !== ''){
-      if (this.state.tipoTelefone === 0){
-        const telefone = this.state.telefone + ' - Residencial';
+    if (this.state.telefone.length >= 14 && this.state.tipoTelefone !== "") {
+      if (this.state.tipoTelefone === 0) {
+        const telefone = this.state.telefone + " - Residencial";
         this.setState({
           itemsTelefone: [...this.state.itemsTelefone, telefone],
           telefone: "",
           tipoTelefone: ""
         });
-      } 
-      else if (this.state.tipoTelefone === 1){
-        const telefone = this.state.telefone + ' - Comercial';
+      } else if (this.state.tipoTelefone === 1) {
+        const telefone = this.state.telefone + " - Comercial";
         this.setState({
           itemsTelefone: [...this.state.itemsTelefone, telefone],
           telefone: ""
         });
-      } 
-      else {
-        const telefone = this.state.telefone + ' - Celular';
+      } else {
+        const telefone = this.state.telefone + " - Celular";
         this.setState({
           itemsTelefone: [...this.state.itemsTelefone, telefone],
           telefone: ""
         });
       }
     }
-
   };
 
   handleKeyDown = evt => {
@@ -400,15 +308,9 @@ class ClienteFormulario extends React.Component {
               >
                 <ArrowBackIcon />
               </IconButton>
-              {cadastro ? (
-                <Typography variant="h6" style={style.title}>
-                  Atualizar Cliente
-                </Typography>
-              ) : (
-                <Typography variant="h6" style={style.title}>
-                  Cadastrar Cliente
-                </Typography>
-              )}
+              <Typography variant="h6" style={style.title}>
+                Visualizar Cliente
+              </Typography>
               <IconButton
                 onClick={this.logout}
                 style={style.appbarIcone}
@@ -428,7 +330,7 @@ class ClienteFormulario extends React.Component {
             <div style={style.containerFila}>
               <div style={style.item}>
                 <TextField
-                  required
+                  disabled
                   id="outlined-basic"
                   autoComplete="off"
                   inputProps={{ maxLength: 100, minLength: 3 }}
@@ -441,10 +343,10 @@ class ClienteFormulario extends React.Component {
               </div>
               <div style={style.item}>
                 <TextField
-                  required
+                  disabled
                   id="outlined-basic"
                   autoComplete="off"
-                  inputProps={{ maxLength: 14, minLength:14 }}
+                  inputProps={{ maxLength: 14, minLength: 14 }}
                   name="CPF"
                   value={this.state.cpf}
                   onChange={this.handleCPFChange}
@@ -457,7 +359,7 @@ class ClienteFormulario extends React.Component {
           <div style={style.containerColuna}>
             <div style={style.item}>
               <TextField
-                required
+                disabled
                 id="outlined-basic"
                 autoComplete="off"
                 name="CEP"
@@ -474,7 +376,7 @@ class ClienteFormulario extends React.Component {
             <div style={style.containerFila}>
               <div style={style.item}>
                 <TextField
-                  required
+                  disabled
                   id="outlined-basic"
                   name="Logradouro"
                   autoComplete="off"
@@ -486,7 +388,7 @@ class ClienteFormulario extends React.Component {
               </div>
               <div style={style.item}>
                 <TextField
-                  required
+                  disabled
                   id="outlined-basic"
                   name="Bairro"
                   autoComplete="off"
@@ -498,7 +400,7 @@ class ClienteFormulario extends React.Component {
               </div>
               <div style={style.item}>
                 <TextField
-                  required
+                  disabled
                   id="outlined-basic"
                   name="Cidade"
                   autoComplete="off"
@@ -510,7 +412,7 @@ class ClienteFormulario extends React.Component {
               </div>
               <div style={style.item}>
                 <TextField
-                  required
+                  disabled
                   id="outlined-basic"
                   name="UF"
                   autoComplete="off"
@@ -523,6 +425,7 @@ class ClienteFormulario extends React.Component {
               <div style={style.item}>
                 <TextField
                   id="outlined-basic"
+                  disabled
                   name="Complemento"
                   autoComplete="off"
                   value={this.state.complemento}
@@ -539,17 +442,21 @@ class ClienteFormulario extends React.Component {
                 <TextField
                   id="outlined-basic"
                   name="Telefone"
+                  disabled
                   inputProps={{ maxLength: 15 }}
                   autoComplete="off"
                   label="Telefone"
                   value={this.state.telefone}
                   onChange={this.handleTelefoneChange}
                   variant="outlined"
-                  helperText="Para adicionar telefones, preencha os campos Telefone e tipo de telefone"
                 />
               </div>
               <div style={style.item}>
-                <FormControl style={style.itemSelect} variant="outlined">
+                <FormControl
+                  style={style.itemSelect}
+                  disabled
+                  variant="outlined"
+                >
                   <InputLabel id="demo-simple-select-label">
                     Tipo de Telefone
                   </InputLabel>
@@ -564,44 +471,19 @@ class ClienteFormulario extends React.Component {
                   </Select>
                 </FormControl>
               </div>
-              <IconButton
-                onClick={this.adicionarTelefone}
-                style={style.appbarIcone}
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                color="inherit"
-                title="Apagar"
-              >
-                <AddIcon />
-              </IconButton>
             </div>
             <div style={style.containerFila}>
-            {this.state.itemsTelefone.map(itemTelefone => (
-              <div style={style.itemEmail} key={itemTelefone}>
-                {itemTelefone}
-                <button
-                  type="button"
-                  style={style.button}
-                  onClick={() => this.handleDeleteTelefone(itemTelefone)}
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-          </div>
+              {this.state.itemsTelefone.map(itemTelefone => (
+                <div style={style.itemEmail} key={itemTelefone}>
+                  {itemTelefone}
+                </div>
+              ))}
+            </div>
           </div>
           <div style={style.containerFila}>
             {this.state.itemsEmail.map(item => (
               <div style={style.itemEmail} key={item}>
                 {item}
-                <button
-                  type="button"
-                  style={style.button}
-                  onClick={() => this.handleDeleteEmail(item)}
-                >
-                  &times;
-                </button>
               </div>
             ))}
           </div>
@@ -609,6 +491,7 @@ class ClienteFormulario extends React.Component {
             <div style={style.containerFila}>
               <div style={style.item}>
                 <TextField
+                  disabled
                   id="outlined-basic"
                   name="Email"
                   autoComplete="off"
@@ -618,27 +501,10 @@ class ClienteFormulario extends React.Component {
                   value={this.state.email}
                   onChange={this.handleEmailChange}
                   variant="outlined"
-                  helperText='Para adicionar emails, pressione a tecla (",", "tabulação", "enter" ou a tecla de espaço)'
                 />
                 {this.state.error && (
                   <p style={style.error}>{this.state.error}</p>
                 )}
-              </div>
-            </div>
-          </div>
-          <div style={style.containerColunaPrimeiro}>
-            <div style={style.containerFila}>
-              <div style={style.item}>
-              {cadastro ? (
-                <Button variant="contained" color="primary" type="submit">
-                Atualizar
-              </Button>
-              ) : (
-                <Button variant="contained" color="primary" type="submit">
-                  Cadastrar
-                </Button>
-              )}
-
               </div>
             </div>
           </div>
@@ -716,15 +582,13 @@ const style = {
   },
   button: {
     backgroundColor: "white",
-    width: "22px",
-    height: "22px",
+    width: "25px",
+    height: "25px",
     borderRadius: "50%",
     border: "none",
     cursor: "pointer",
     font: "inherit",
-    marginLeft: "10px",
     fontWeight: "bold",
-    padding: "0",
     lineHeight: "1",
     display: "flex",
     alignItems: "center",
@@ -734,4 +598,4 @@ const style = {
     width: "250px"
   }
 };
-export default ClienteFormulario;
+export default visualizarCliente;

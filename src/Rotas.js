@@ -3,7 +3,7 @@ import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import Login  from './components/Login';
 import Home from './components/Home';
 import ClienteFormulario from './components/ClientesFormulario';
-import ClienteFormularioEditar from './components/ClientesFormularioEditar';
+import visualizarCliente from './components/visualizarCliente';
 
 function Routes() {
     return (
@@ -12,7 +12,8 @@ function Routes() {
                 <Route path="/home" exact component={Home} />
                 <Route path="/login" exact component={Login} />
                 <Route path="/cliente/" exact component={ClienteFormulario} />
-                <Route path="/cliente/:id" exact component={ClienteFormularioEditar} />
+                <Route path="/cliente/:id" exact component={ClienteFormulario} />
+                <Route path="/cliente/visualizar/:id" exact component={visualizarCliente} />
                 <Route path="/" >
                     <Redirect to="/home" />
                 </Route>

@@ -1,6 +1,7 @@
 import { BehaviorSubject } from "rxjs";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
+import moment from 'moment'
 
 const currentUserSubject = new BehaviorSubject(
   JSON.parse(localStorage.getItem("currentUser"))
@@ -29,12 +30,10 @@ function tokenValido() {
   if (currentUserSubject.value) {
     const token = currentUserSubject.value;
     const decodedToken = jwt_decode(token.substring(7));
-    // console.log(decodedToken.exp);
-    const dateNow = new Date();
-    // console.log(dateNow);
-    // if(decodedToken.exp < dateNow.getTime()){
-    //     this.logout();
-    // }
+    const dateNow = moment().unix();
+    if(moment(decodedToken.exp).isBefore(dateNow)){
+        this.logout();
+    }
     return true;
   }
   this.logout();
